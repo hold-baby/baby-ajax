@@ -2,12 +2,12 @@
 One is only 5KB ajax library
 # NPM
 
-```
+```bash
 npm install baby-ajax
 ```
 # Example
 
-```
+```js
 Ajax.config({
   baseUrl : "http://127.0.0.1:10010"  //配置一个默认地址
 })
@@ -40,7 +40,8 @@ Ajax.post('/ajax/post', {
 ```
 
 # API
-```
+
+```js
 Ajax.get(url, opt)
 Ajax.delete(url, opt)
 Ajax.post(url, data, opt)
@@ -51,7 +52,7 @@ Ajax.catch = function(){ /*  your code  */ }  //请求返回后的统一拦截�
 ```
 
 # opt
-```
+```js
 {
   method : "GET"  // 请求方法，只有在使用 Ajax.get(url, opt)方法时生效
   url : "http://127.0.0.1:10010/ajax/get",  // url
