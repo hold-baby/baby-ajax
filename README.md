@@ -22,8 +22,8 @@ Ajax.ajax({
 
 Ajax.get('/ajax/get', {
   headers : {
-		'Authorization' : "test"
-	}
+    'Authorization' : "test"
+  }
 }).then(function(res){
   console.log(res)
 }, function(res){
