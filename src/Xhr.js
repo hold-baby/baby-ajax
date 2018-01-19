@@ -7,7 +7,14 @@ function xhrObj(type, opts, postData){
 	this.opts = opts;
 	this.postData = postData;
 	this.catch = opts.catch;
+	this.mobileHandle = opts.mobileHandle
 	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+
+	if(!!this.mobileHandle && typeof this.mobileHandle == 'function'){
+		MOBLIE_CATCH.push(this.xmlHttp)
+		this.mobileHandle()
+	}
+
 	this.xmlHttp.open(opts.method, opts.url, opts.async);
 	this.xmlHttp.withCredentials = opts.withCredentials;
 	for(var i in this.opts.headers){

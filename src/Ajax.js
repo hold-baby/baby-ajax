@@ -1,6 +1,8 @@
 import {mergeHeaders, request_1, request_2} from './Common.js'
 import xhrObj from './Xhr.js'
 
+window.MOBLIE_CATCH = [];  //预留mobile拦截数组
+
 /*
     ajax构造函数
 */
@@ -9,7 +11,7 @@ function Ajax(){
 	this.opts = {};
 	this.opts.headers = {
 		'Content-Type' : 'application/json;charset=utf-8',
-	}
+	};
 	this.opts.method = 'POST';
 	this.opts.async = true;
 	this.opts.data = null;
@@ -21,6 +23,9 @@ function Ajax(){
 
 	// 注册拦截函数
 	this.catch = function(){};
+
+	// 移动端请求句柄
+	this.mobileHandle = null;
 }
 
 
@@ -40,6 +45,7 @@ Ajax.prototype.creatOpts = function (opts){
 	_opts.method = opts.method && opts.method.toUpperCase();
 
     _opts.catch = this.catch;
+    _opts.mobileHandle = this.mobileHandle;
     return _opts;
 };
 

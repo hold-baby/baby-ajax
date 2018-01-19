@@ -1,4 +1,5 @@
 var addr = "http://127.0.0.1:10010"
+
 function on(id,fn){
 	var ele = document.getElementById(id);
 	ele.addEventListener("click",fn,false)
@@ -11,8 +12,9 @@ Ajax.config({
 		'Authorization' : "test"
 	},
 	withCredentials : true,
-	baseUrl : addr
+	baseUrl : addr,
 })
+
 on("ajax", function(){
 	Ajax.ajax({
 		url : "/ajax/get?u=1",

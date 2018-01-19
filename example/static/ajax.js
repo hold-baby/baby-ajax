@@ -12,7 +12,14 @@ function xhrObj(type, opts, postData) {
 	this.opts = opts;
 	this.postData = postData;
 	this.catch = opts.catch;
+	this.mobileHandle = opts.mobileHandle;
 	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+
+	if (!!this.mobileHandle && typeof this.mobileHandle == 'function') {
+		MOBLIE_CATCH.push(this.xmlHttp);
+		this.mobileHandle();
+	}
+
 	this.xmlHttp.open(opts.method, opts.url, opts.async);
 	this.xmlHttp.withCredentials = opts.withCredentials;
 	for (var i in this.opts.headers) {
@@ -82,6 +89,8 @@ function request_2(_opts) {
 	return new xhrObj("methods_2", opts, postData);
 }
 
+window.MOBLIE_CATCH = []; //预留mobile拦截数组
+
 /*
     ajax构造函数
 */
@@ -102,6 +111,9 @@ function Ajax() {
 
 	// 注册拦截函数
 	this.catch = function () {};
+
+	// 移动端请求句柄
+	this.mobileHandle = null;
 }
 
 /*
@@ -119,6 +131,7 @@ Ajax.prototype.creatOpts = function (opts) {
 	_opts.method = opts.method && opts.method.toUpperCase();
 
 	_opts.catch = this.catch;
+	_opts.mobileHandle = this.mobileHandle;
 	return _opts;
 };
 

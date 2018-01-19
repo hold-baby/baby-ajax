@@ -56,7 +56,7 @@ Ajax.catch = function(){ /*  your code  */ }  //请求返回后的统一拦截�
 {
   method : "GET"  // 请求方法，只有在使用 Ajax.get(url, opt)方法时生效
   url : "http://127.0.0.1:10010/ajax/get",  // url
-  baseYrl : "",  // 基础地址  最后的 url = baseUrl + url
+  baseUrl : "",  // 基础地址  最后的 url = baseUrl + url
   async : true,  // true : 异步, false : 同步  默认为true
   data : {},  // 请求参数
 }
