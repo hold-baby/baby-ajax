@@ -110,4 +110,14 @@ for(var j in methods_2){
 	}(methods_2, j)
 };
 
+/*
+  文件上传
+*/
+Ajax.prototype.uploader = function(dom, opt){
+	var fileObj = dom.files[0]; // js 获取文件对象
+
+	var form = new FormData();
+	form.append("file", fileObj); // 文件对象
+}
+
 export default Ajax
