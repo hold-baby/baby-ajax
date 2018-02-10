@@ -89,6 +89,111 @@ function request_2(_opts) {
 	return new xhrObj("methods_2", opts, postData);
 }
 
+// 构建上传返回体
+function parseFileRes(evt) {
+	return {
+		res: JSON.parse(evt.target.responseText),
+		status: evt.target.status
+	};
+}
+
+/*
+  xml上传文件
+*/
+function XhrFile(form, opt, dom) {
+    var _this = this;
+    this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    this.dom = dom;
+    this.xmlHttp.onload = uploadComplete; // 请求完成
+    this.xmlHttp.onerror = uploadFailed; // 请求失败
+
+    this.xmlHttp.upload.onprogress = progressFunction; // 上传进度调用方法实现
+
+
+    this.onSuccessItem = function () {};
+    this.onBeforeUploadItem = function () {};
+    this.onErrorItem = function () {};
+    this.onProgressItem = function () {};
+
+    var ot, oloaded;
+    this.xmlHttp.upload.onloadstart = function () {
+        //上传开始执行方法
+        ot = new Date().getTime(); //设置上传开始时间
+        oloaded = 0; //设置上传开始时，以上传的文件大小为0
+    };
+
+    setTimeout(function () {
+        _this.onBeforeUploadItem(form);
+
+        _this.xmlHttp.open("post", opt.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+        _this.xmlHttp.send(form); //开始上传，发送form数据
+    }, 100);
+
+    //上传成功响应
+    function uploadComplete(evt) {
+        //服务断接收完文件返回的结果
+        console.log(evt);
+        var res = parseFileRes(evt).res;
+        var status = parseFileRes(evt).status;
+        _this.onSuccessItem(form, res, status);
+        // dom.value = "";
+    }
+    //上传失败
+    function uploadFailed(evt) {
+        var res = parseFileRes(evt).res;
+        var status = parseFileRes(evt).status;
+        _this.onErrorItem(form, res, status);
+    }
+
+    //上传进度实现方法，上传过程中会频繁调用该方法
+    function progressFunction(evt) {
+        var progress = {}; // 包含上传百分百 速度
+        var progressBar = {};
+        if (evt.lengthComputable) {
+            //
+            progressBar.max = evt.total;
+            progressBar.value = evt.loaded;
+            progress.percent = Math.round(evt.loaded / evt.total * 100);
+        }
+
+        var nt = new Date().getTime(); //获取当前时间
+        var pertime = (nt - ot) / 1000; //计算出上次调用该方法时到现在的时间差，单位为s
+        ot = new Date().getTime(); //重新赋值时间，用于下次计算
+        var perload = evt.loaded - oloaded; //计算该分段上传的文件大小，单位b
+        oloaded = evt.loaded; //重新赋值已上传文件大小，用以下次计算
+        //上传速度计算
+        var speed = perload / pertime; //单位b/s
+        var bspeed = speed;
+        var units = 'b/s'; //单位名称
+        if (speed / 1024 > 1) {
+            speed = speed / 1024;
+            units = 'kb/s';
+        }
+        if (speed / 1024 > 1) {
+            speed = speed / 1024;
+            units = 'Mb/s';
+        }
+        speed = speed.toFixed(1);
+        //剩余时间
+        var resttime = ((evt.total - evt.loaded) / bspeed).toFixed(1);
+        progress.speed = speed + units;
+        progress.resttime = resttime;
+
+        if (bspeed == 0) progress.bspeed = '上传已取消';
+        _this.onProgressItem(form, progress);
+    }
+}
+
+// 取消上传
+XhrFile.prototype.cancleUploadFile = function () {
+    console.log("cancleUploadFile");
+    this.xmlHttp.abort();
+};
+// 清除文件
+XhrFile.prototype.clearUploadFile = function () {
+    this.dom.value = "";
+};
+
 window.MOBLIE_CATCH = []; //预留mobile拦截数组
 
 /*
@@ -193,6 +298,18 @@ for (var j in methods_2) {
 		};
 	}(methods_2, j);
 }
+
+/*
+  文件上传
+*/
+Ajax.prototype.uploader = function (dom, opt) {
+	var fileObj = dom.files[0]; // js 获取文件对象
+
+	var form = new FormData();
+	form.append("file", fileObj); // 文件对象
+
+	return new XhrFile(form, opt, dom);
+};
 
 // 检验是否浏览器环境
 try {

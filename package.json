@@ -17,7 +17,9 @@
   "keywords": [
     "ajax",
     "http",
-    "xhr"
+    "xhr",
+    "upload",
+    "uploader"
   ],
   "author": "hold-baby",
   "license": "MIT",
@@ -44,5 +46,9 @@
     "rollup": "^0.54.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-node-resolve": "^3.0.2"
+  },
+  "dependencies": {
+    "formidable": "^1.1.1",
+    "util": "^0.10.3"
   }
 }

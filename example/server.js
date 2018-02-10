@@ -1,5 +1,9 @@
 var express = require("express");
+var path = require("path");
+var fs = require("fs");
 var bodyParser = require('body-parser');
+var formidable = require('formidable');
+var util = require('util');
 var opn = require("opn")
 var exec = require("child_process").exec;
 
@@ -73,6 +77,52 @@ app.patch("/ajax/patch", function(req, res){
 	var query = req.body;
 	res.status(creatStatus()).send({
 		des : query
+	})
+})
+
+var uploadDir = path.join(__dirname + '/fileTmp')  //文件保存的临时目录为当前项目下的tmp文件夹  
+var maxFieldsSize = 1 * 1024 * 1024;  // 文件大小限制为最大1M 
+var targetDir = path.join(__dirname + '/public'); //文件移动的目录文件夹，不存在时创建目标文件夹 
+var allowFile = '.jpg.jpeg.png.gif';  // 允许上传的类型
+app.post("/ajax/upload",function(req,res){
+	var form  = new formidable.IncomingForm();
+	form.uploadDir = uploadDir;   
+    form.maxFieldsSize =    maxFieldsSize
+    form.keepExtensions = true;        //使用文件的原扩展名 
+	form.parse(req,function(err,fields,file){
+		var filePath = "";
+		if(file.tmpFile){  
+            filePath = file.tmpFile.path;  
+        } else {  
+            for(var key in file){  
+                if( file[key].path && filePath==='' ){  
+                    filePath = file[key].path;  
+                    break;  
+                }  
+            }  
+        }
+         
+        if (!fs.existsSync(targetDir)) {  
+            fs.mkdir(targetDir);  
+        }
+        var fileExt = filePath.substring(filePath.lastIndexOf('.'));
+        if ((allowFile).indexOf(fileExt.toLowerCase()) === -1) {  
+            var err = new Error('此文件类型不允许上传');  
+            res.json({code:-1, message:'此文件类型不允许上传'});  
+        } else {
+            //以当前时间戳对上传文件进行重命名  
+            var fileName = new Date().getTime() + fileExt;  
+            var targetFile = path.join(targetDir, fileName);  
+            //移动文件  
+            fs.rename(filePath, targetFile, function (err) {  
+                if (err) {  
+                    console.info(err);  
+                    res.json({code:-1, message:'操作失败'});  
+                } else {  
+                    res.json({code:0, message:'操作成功'});  
+                }  
+            });  
+        } 
 	})
 })
 

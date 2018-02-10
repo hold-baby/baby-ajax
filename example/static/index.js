@@ -1,5 +1,6 @@
 var addr = "http://127.0.0.1:10010"
 
+
 function on(id,fn){
 	var ele = document.getElementById(id);
 	ele.addEventListener("click",fn,false)
@@ -83,3 +84,27 @@ on("patch",function(){
 		console.log(res)
 	})
 })
+on("fileId",function(){
+	var fileInput = document.getElementById("fileUpload")
+	var uploader = Ajax.uploader(fileInput, {
+		url : addr + "/ajax/upload",
+		isClear : true
+	})
+	uploader.onBeforeUploadItem = function(item){
+		
+	}
+	uploader.onSuccessItem  = function(item, res, status){
+		console.log(res);
+	}
+	uploader.onErrorItem  = function(item, res, status){
+		console.log("onErrorItem")
+	}
+	uploader.onProgressItem  = function(item, progress){
+		console.log(progress)
+		showDes(progress.percent);
+	}
+})
+function showDes(str){
+	var des = document.getElementById("des");
+	des.innerHTML = str;
+}

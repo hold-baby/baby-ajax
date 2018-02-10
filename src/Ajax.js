@@ -1,5 +1,6 @@
 import {mergeHeaders, request_1, request_2} from './Common.js'
 import xhrObj from './Xhr.js'
+import XhrFile from './XhrFile.js'
 
 window.MOBLIE_CATCH = [];  //预留mobile拦截数组
 
@@ -118,6 +119,8 @@ Ajax.prototype.uploader = function(dom, opt){
 
 	var form = new FormData();
 	form.append("file", fileObj); // 文件对象
+
+	return new XhrFile(form, opt, dom)
 }
 
 export default Ajax
