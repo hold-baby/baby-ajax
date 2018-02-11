@@ -90,6 +90,7 @@ app.post("/ajax/upload",function(req,res){
     form.maxFieldsSize =    maxFieldsSize
     form.keepExtensions = true;        //使用文件的原扩展名 
 	form.parse(req,function(err,fields,file){
+        console.log(fields)
 		var filePath = "";
 		if(file.tmpFile){  
             filePath = file.tmpFile.path;  

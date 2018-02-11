@@ -114,13 +114,26 @@ for(var j in methods_2){
 /*
   文件上传
 */
-Ajax.prototype.uploader = function(dom, opt){
+Ajax.prototype.uploader = function(id, opt){
+	var dom = document.getElementById(id);
 	var fileObj = dom.files[0]; // js 获取文件对象
-
 	var form = new FormData();
 	form.append("file", fileObj); // 文件对象
 
-	return new XhrFile(form, opt, dom)
+	// 构建fileItem
+	var fileItem = {
+		formData : form,
+		url : opt.url,
+		data : opt.data || "",
+		addr : dom.value,
+		isUpload : false,
+		isCancel : false,
+		isUploadding : false,
+		isError : false,
+		isUploadClear : false
+	}
+
+	return new XhrFile(fileItem, dom)
 }
 
 export default Ajax

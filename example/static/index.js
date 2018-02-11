@@ -86,22 +86,24 @@ on("patch",function(){
 })
 on("fileId",function(){
 	var fileInput = document.getElementById("fileUpload")
-	var uploader = Ajax.uploader(fileInput, {
+	var uploader = Ajax.uploader("fileUpload", {
 		url : addr + "/ajax/upload",
-		isClear : true
+		isUploadClear : true,
+		data : ["asdf","fsda"]
 	})
 	uploader.onBeforeUploadItem = function(item){
-		
+		item.data = {
+			"123" : 321
+		}
 	}
 	uploader.onSuccessItem  = function(item, res, status){
-		console.log(res);
+		console.log(item);
 	}
 	uploader.onErrorItem  = function(item, res, status){
-		console.log("onErrorItem")
+		console.log(item)
 	}
 	uploader.onProgressItem  = function(item, progress){
-		console.log(progress)
-		showDes(progress.percent);
+		console.log(item.isUpload)
 	}
 })
 function showDes(str){
