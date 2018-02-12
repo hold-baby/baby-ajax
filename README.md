@@ -61,3 +61,29 @@ Ajax.catch = function(){ /*  your code  */ }  //请求返回后的统一拦截�
   data : {},  // 请求参数
 }
 ```
+# uploader
+
+```js
+var uploader = Ajax.uploader(id, opt)  // id为input[type=file]的id  opt为配置对象
+uploader.onBeforeUploadItem = function(fileItem){
+  // 上传前回调
+}
+uploader.onSuccessItem  = function(fileItem, res, status){
+  // 上传成功回调
+}
+uploader.onErrorItem  = function(fileItem, res, status){
+  // 上传失败回调
+}
+uploader.onProgressItem  = function(fileItem, progress){
+  // 正在上传回调
+}
+```
+## uploader opt
+
+```js
+var opt = {
+  url : url,  // 上传地址
+  isUploadClear : false,  // 上传成功或失败后是否清除文件对象
+  data : data  // 上传附带参数
+}
+```

@@ -1,5 +1,9 @@
 var express = require("express");
+var path = require("path");
+var fs = require("fs");
 var bodyParser = require('body-parser');
+var formidable = require('formidable');
+var util = require('util');
 var opn = require("opn")
 var exec = require("child_process").exec;
 
@@ -73,6 +77,72 @@ app.patch("/ajax/patch", function(req, res){
 	var query = req.body;
 	res.status(creatStatus()).send({
 		des : query
+	})
+})
+
+var uploadDir = path.join(__dirname + '/fileTmp')  //文件保存的临时目录为当前项目下的tmp文件夹  
+var maxFieldsSize = 1 * 1024 * 1024;  // 文件大小限制为最大1M 
+var targetDir = path.join(__dirname + '/public'); //文件移动的目录文件夹，不存在时创建目标文件夹 
+// var allowFile = '.jpg.jpeg.png.gif';  // 允许上传的类型
+var allowFile = ['.jpg','.jpeg','.png','.gif'];  // 允许上传的类型
+var limitFile = [];  // 禁止上传的类型
+var limitType = 0; // 1 : allowFile; 0 : limitFile
+
+app.post("/ajax/upload",function(req,res){
+	var form  = new formidable.IncomingForm();
+	form.uploadDir = uploadDir;   
+    form.maxFieldsSize =    maxFieldsSize
+    form.keepExtensions = true;        //使用文件的原扩展名 
+	form.parse(req,function(err,fields,file){  // fields额外参数
+		var filePath = "";
+		if(file.tmpFile){  
+            filePath = file.tmpFile.path;  
+        } else {  
+            for(var key in file){  
+                if( file[key].path && filePath==='' ){  
+                    filePath = file[key].path;  
+                    break;  
+                }  
+            }  
+        }
+         
+        if (!fs.existsSync(targetDir)) {  
+            fs.mkdir(targetDir);  
+        }
+        var fileExt = filePath.substring(filePath.lastIndexOf('.'));
+        var isAllowUpload = false // 是否允许上传
+        if(limitType == 1){
+            isAllowUpload = allowFile.some(function(type){
+                return fileExt.toLowerCase() == type
+            })
+        }else{
+            isAllowUpload = !limitFile.some(function(type){
+                return fileExt.toLowerCase() == type
+            })
+        }
+        if(isAllowUpload){  
+            //以当前时间戳对上传文件进行重命名  
+            var fileName = new Date().getTime() + fileExt;  
+            var targetFile = path.join(targetDir, fileName);  
+            //移动文件  
+            fs.rename(filePath, targetFile, function (err) {  
+                if(err){  
+                    console.info(err);  
+                    res.status(400).send({
+                        message : "操作失败"
+                    }).end();
+                }else{  
+                    res.status(200).send({
+                        message : "操作成功"
+                    }).end();
+                }  
+            });  
+        }else{
+            var err = new Error('此文件类型不允许上传');  
+            res.status(400).send({
+                message : "此文件类型不允许上传"
+            }).end();
+        } 
 	})
 })
 

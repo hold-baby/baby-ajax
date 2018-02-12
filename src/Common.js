@@ -35,3 +35,11 @@ export function request_2(_opts){
     var postData = JSON.stringify(opts.data);
     return new xhrObj("methods_2", opts, postData)
 }
+
+// 构建上传返回体
+export function parseFileRes(evt){
+	return {
+		res : JSON.parse(evt.target.responseText),
+		status : evt.target.status
+	}
+};

@@ -1,5 +1,6 @@
 import {mergeHeaders, request_1, request_2} from './Common.js'
 import xhrObj from './Xhr.js'
+import XhrFile from './XhrFile.js'
 
 window.MOBLIE_CATCH = [];  //预留mobile拦截数组
 
@@ -24,11 +25,7 @@ function Ajax(){
 	// 注册拦截函数
 	this.catch = function(){};
 
-	// 移动端请求句柄
-	this.mobileHandle = null;
 }
-
-
 
 /*
   整合opt
@@ -45,7 +42,6 @@ Ajax.prototype.creatOpts = function (opts){
 	_opts.method = opts.method && opts.method.toUpperCase();
 
     _opts.catch = this.catch;
-    _opts.mobileHandle = this.mobileHandle;
     return _opts;
 };
 
@@ -63,6 +59,7 @@ Ajax.prototype.ajax = function(_opts){
 		return xml
     }
     opts.url = this.opts.baseUrl + opts.url;
+    console.log(xmlHttp)
     return new xhrObj(opts, xmlHttp)
 };
 
@@ -109,5 +106,30 @@ for(var j in methods_2){
 		}
 	}(methods_2, j)
 };
+
+/*
+  文件上传
+*/
+Ajax.prototype.uploader = function(id, opt){
+	var dom = document.getElementById(id);
+	var fileObj = dom.files[0]; // js 获取文件对象
+	var form = new FormData();
+	form.append("file", fileObj); // 文件对象
+
+	// 构建fileItem
+	var fileItem = {
+		formData : form,
+		url : opt.url || "",
+		data : opt.data || "",
+		addr : dom.value || "",
+		isUpload : false,
+		isCancel : false,
+		isUploadding : false,
+		isError : false,
+		isUploadClear : opt.isUploadClear || false
+	}
+
+	return new XhrFile(fileItem, dom)
+}
 
 export default Ajax
