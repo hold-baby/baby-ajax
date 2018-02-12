@@ -25,11 +25,7 @@ function Ajax(){
 	// 注册拦截函数
 	this.catch = function(){};
 
-	// 移动端请求句柄
-	this.mobileHandle = null;
 }
-
-
 
 /*
   整合opt
@@ -46,7 +42,6 @@ Ajax.prototype.creatOpts = function (opts){
 	_opts.method = opts.method && opts.method.toUpperCase();
 
     _opts.catch = this.catch;
-    _opts.mobileHandle = this.mobileHandle;
     return _opts;
 };
 
@@ -64,6 +59,7 @@ Ajax.prototype.ajax = function(_opts){
 		return xml
     }
     opts.url = this.opts.baseUrl + opts.url;
+    console.log(xmlHttp)
     return new xhrObj(opts, xmlHttp)
 };
 
@@ -123,14 +119,14 @@ Ajax.prototype.uploader = function(id, opt){
 	// 构建fileItem
 	var fileItem = {
 		formData : form,
-		url : opt.url,
+		url : opt.url || "",
 		data : opt.data || "",
-		addr : dom.value,
+		addr : dom.value || "",
 		isUpload : false,
 		isCancel : false,
 		isUploadding : false,
 		isError : false,
-		isUploadClear : false
+		isUploadClear : opt.isUploadClear || false
 	}
 
 	return new XhrFile(fileItem, dom)
