@@ -11,14 +11,8 @@ function xhrObj(type, opts, postData) {
 	this.type = type;
 	this.opts = opts;
 	this.postData = postData;
-	this.catch = opts.catch;
-	this.mobileHandle = opts.mobileHandle;
+	this.catch = opts.catch || function () {};
 	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-
-	if (!!this.mobileHandle && typeof this.mobileHandle == 'function') {
-		MOBLIE_CATCH.push(this.xmlHttp);
-		this.mobileHandle();
-	}
 
 	this.xmlHttp.open(opts.method, opts.url, opts.async);
 	this.xmlHttp.withCredentials = opts.withCredentials;
@@ -100,10 +94,10 @@ function parseFileRes(evt) {
 /*
   xml上传文件
 */
-function XhrFile(fileItem, dom) {
+function XhrFile(opt, dom) {
     var _this = this;
     this.dom = dom;
-    this.fileItem = fileItem;
+    this.opt = opt;
 
     this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     this.xmlHttp.onload = uploadComplete; // 请求完成
@@ -123,13 +117,12 @@ function XhrFile(fileItem, dom) {
         _this.fileItem.isUploadding = true;
     };
 
-    // 怎么延时确保自定义函数已绑定
-    setTimeout(function () {
-        _this.onBeforeUploadItem(fileItem);
-        _this.xmlHttp.open("post", fileItem.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
-        fileItem.formData.append("parm", JSON.stringify(fileItem.data)); // 文件对象添加额外参数
-        _this.xmlHttp.send(fileItem.formData); //开始上传，发送form数据
-    }, 100);
+    // 给input绑定change事件
+    this.dom.onchange = function () {
+        if (_this.opt.autoUpload || false) {
+            _this.upload();
+        }
+    };
 
     //上传成功响应
     function uploadComplete(evt) {
@@ -189,9 +182,42 @@ function XhrFile(fileItem, dom) {
     }
 }
 
+// 开始上传
+XhrFile.prototype.upload = function () {
+    if (!this.dom.value) return;
+    var _this = this;
+
+    var fileObj = this.dom.files[0]; // js 获取文件对象
+    var form = new FormData();
+    form.append("file", fileObj); // 文件对象
+    form.append("parm", JSON.stringify(this.opt.data)); // 文件对象添加额外参数
+
+    // 构建fileItem
+    var fileItem = {
+        formData: form,
+        url: this.opt.url || "",
+        data: this.opt.data || "",
+        addr: this.dom.value || "",
+        isUpload: false,
+        isCancel: false,
+        isUploadding: false,
+        isError: false,
+        isUploadClear: this.opt.isUploadClear || false,
+        autoUpload: this.opt.autoUpload || false
+    };
+
+    this.fileItem = fileItem;
+
+    // 怎么延时确保自定义函数已绑定
+    setTimeout(function () {
+        _this.onBeforeUploadItem(_this.fileItem);
+        _this.xmlHttp.open("post", _this.fileItem.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+        _this.xmlHttp.send(_this.fileItem.formData); //开始上传，发送form数据
+    }, 20);
+};
+
 // 取消上传
 XhrFile.prototype.cancleUploadFile = function () {
-    console.log("cancleUploadFile");
     _this.fileItem.isCancel = true;
     _this.fileItem.isUploadding = false;
     _this.fileItem.isUpload = false;
@@ -201,11 +227,11 @@ XhrFile.prototype.cancleUploadFile = function () {
 // 清除文件
 XhrFile.prototype.clearUploadFile = function () {
     if (this.fileItem.isUploadClear) {
+        // this.dom.outerHTML = this.dom.outerHTML;
         this.dom.value = "";
+        this.dom.files[0] = null;
     }
 };
-
-window.MOBLIE_CATCH = []; //预留mobile拦截数组
 
 /*
     ajax构造函数
@@ -278,7 +304,7 @@ Ajax.prototype.config = function (opts) {
 };
 
 // 请求方法集合
-var methods_1 = ['get', 'delete', 'head', 'options']; //不带data
+var methods_1 = ['get', 'del', 'head', 'options']; //不带data
 var methods_2 = ['post', 'put', 'patch']; //带data
 for (var i in methods_1) {
 	!function (methods_1, i) {
@@ -312,24 +338,9 @@ for (var j in methods_2) {
 */
 Ajax.prototype.uploader = function (id, opt) {
 	var dom = document.getElementById(id);
-	var fileObj = dom.files[0]; // js 获取文件对象
-	var form = new FormData();
-	form.append("file", fileObj); // 文件对象
+	if (dom.type !== "file") return;
 
-	// 构建fileItem
-	var fileItem = {
-		formData: form,
-		url: opt.url || "",
-		data: opt.data || "",
-		addr: dom.value || "",
-		isUpload: false,
-		isCancel: false,
-		isUploadding: false,
-		isError: false,
-		isUploadClear: opt.isUploadClear || false
-	};
-
-	return new XhrFile(fileItem, dom);
+	return new XhrFile(opt, dom);
 };
 
 // 检验是否浏览器环境
