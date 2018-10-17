@@ -2,8 +2,6 @@ import {mergeHeaders, request_1, request_2} from './Common.js'
 import xhrObj from './Xhr.js'
 import XhrFile from './XhrFile.js'
 
-window.MOBLIE_CATCH = [];  //预留mobile拦截数组
-
 /*
     ajax构造函数
 */
@@ -11,7 +9,7 @@ function Ajax(){
 	// 注册初始配置
 	this.opts = {};
 	this.opts.headers = {
-		'Content-Type' : 'application/json;charset=utf-8',
+		'Content-Type' : 'application/json;charset=utf-8'
 	};
 	this.opts.method = 'POST';
 	this.opts.async = true;
@@ -25,7 +23,7 @@ function Ajax(){
 	// 注册拦截函数
 	this.catch = function(){};
 
-}
+};
 
 /*
   整合opt
@@ -78,7 +76,7 @@ Ajax.prototype.config = function(opts){
 
 
 // 请求方法集合
-var methods_1 = ['get', 'delete', 'head', 'options']; //不带data
+var methods_1 = ['get', 'del', 'head', 'options']; //不带data
 var methods_2 = ['post', 'put', 'patch']; //带data
 for(var i in methods_1){
 	!function(methods_1, i){
@@ -112,24 +110,11 @@ for(var j in methods_2){
 */
 Ajax.prototype.uploader = function(id, opt){
 	var dom = document.getElementById(id);
-	var fileObj = dom.files[0]; // js 获取文件对象
-	var form = new FormData();
-	form.append("file", fileObj); // 文件对象
+	if(dom.type !== "file") return
 
-	// 构建fileItem
-	var fileItem = {
-		formData : form,
-		url : opt.url || "",
-		data : opt.data || "",
-		addr : dom.value || "",
-		isUpload : false,
-		isCancel : false,
-		isUploadding : false,
-		isError : false,
-		isUploadClear : opt.isUploadClear || false
-	}
+	opt.url = this.opts.baseUrl + opt.url;
 
-	return new XhrFile(fileItem, dom)
+	return new XhrFile(opt, dom)
 }
 
 export default Ajax

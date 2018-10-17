@@ -77,6 +77,7 @@ uploader.onErrorItem  = function(fileItem, res, status){
 uploader.onProgressItem  = function(fileItem, progress){
   // 正在上传回调
 }
+uploader.upload()  // 开始上传
 ```
 ## uploader opt
 
@@ -84,6 +85,7 @@ uploader.onProgressItem  = function(fileItem, progress){
 var opt = {
   url : url,  // 上传地址
   isUploadClear : false,  // 上传成功或失败后是否清除文件对象
-  data : data  // 上传附带参数
+  data : data,  // 上传附带参数
+  autoUpload : false  // 是否添加后自动上传
 }
 ```

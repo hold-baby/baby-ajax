@@ -11,14 +11,8 @@ function xhrObj(type, opts, postData) {
 	this.type = type;
 	this.opts = opts;
 	this.postData = postData;
-	this.catch = opts.catch;
-	this.mobileHandle = opts.mobileHandle;
+	this.catch = opts.catch || function () {};
 	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-
-	if (!!this.mobileHandle && typeof this.mobileHandle == 'function') {
-		MOBLIE_CATCH.push(this.xmlHttp);
-		this.mobileHandle();
-	}
 
 	this.xmlHttp.open(opts.method, opts.url, opts.async);
 	this.xmlHttp.withCredentials = opts.withCredentials;
@@ -100,15 +94,15 @@ function parseFileRes(evt) {
 /*
   xml上传文件
 */
-function XhrFile(form, opt, dom) {
+function XhrFile(opt, dom) {
     var _this = this;
-    this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     this.dom = dom;
+    this.opt = opt;
+
+    this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     this.xmlHttp.onload = uploadComplete; // 请求完成
     this.xmlHttp.onerror = uploadFailed; // 请求失败
-
     this.xmlHttp.upload.onprogress = progressFunction; // 上传进度调用方法实现
-
 
     this.onSuccessItem = function () {};
     this.onBeforeUploadItem = function () {};
@@ -120,29 +114,34 @@ function XhrFile(form, opt, dom) {
         //上传开始执行方法
         ot = new Date().getTime(); //设置上传开始时间
         oloaded = 0; //设置上传开始时，以上传的文件大小为0
+        _this.fileItem.isUploadding = true;
     };
 
-    setTimeout(function () {
-        _this.onBeforeUploadItem(form);
-
-        _this.xmlHttp.open("post", opt.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
-        _this.xmlHttp.send(form); //开始上传，发送form数据
-    }, 100);
+    // 给input绑定change事件
+    this.dom.onchange = function () {
+        if (_this.opt.autoUpload || false) {
+            _this.upload();
+        }
+    };
 
     //上传成功响应
     function uploadComplete(evt) {
         //服务断接收完文件返回的结果
-        console.log(evt);
         var res = parseFileRes(evt).res;
         var status = parseFileRes(evt).status;
-        _this.onSuccessItem(form, res, status);
-        // dom.value = "";
+        _this.fileItem.isUpload = true;
+        _this.fileItem.isUploadding = false;
+        _this.onSuccessItem(_this.fileItem, res, status);
+        _this.clearUploadFile();
     }
     //上传失败
     function uploadFailed(evt) {
         var res = parseFileRes(evt).res;
         var status = parseFileRes(evt).status;
-        _this.onErrorItem(form, res, status);
+        _this.fileItem.isError = true;
+        _this.fileItem.isUploadding = false;
+        _this.onErrorItem(_this.fileItem, res, status);
+        _this.clearUploadFile();
     }
 
     //上传进度实现方法，上传过程中会频繁调用该方法
@@ -155,7 +154,6 @@ function XhrFile(form, opt, dom) {
             progressBar.value = evt.loaded;
             progress.percent = Math.round(evt.loaded / evt.total * 100);
         }
-
         var nt = new Date().getTime(); //获取当前时间
         var pertime = (nt - ot) / 1000; //计算出上次调用该方法时到现在的时间差，单位为s
         ot = new Date().getTime(); //重新赋值时间，用于下次计算
@@ -180,21 +178,67 @@ function XhrFile(form, opt, dom) {
         progress.resttime = resttime;
 
         if (bspeed == 0) progress.bspeed = '上传已取消';
-        _this.onProgressItem(form, progress);
+        _this.onProgressItem(_this.fileItem, progress);
     }
 }
 
+// 开始上传
+XhrFile.prototype.upload = function () {
+    if (!this.dom.value) return;
+    var _this = this;
+
+    var fileObj = this.dom.files[0]; // js 获取文件对象
+    var form = new FormData();
+    form.append("file", fileObj); // 文件对象
+    form.append("parm", JSON.stringify(this.opt.data)); // 文件对象添加额外参数
+
+    // 构建fileItem
+    var fileItem = {
+        formData: form,
+        url: this.opt.url || "",
+        data: this.opt.data || "",
+        addr: this.dom.value || "",
+        isUpload: false,
+        isCancel: false,
+        isUploadding: false,
+        isError: false,
+        isUploadClear: this.opt.isUploadClear || false,
+        autoUpload: this.opt.autoUpload || false
+    };
+
+    this.fileItem = fileItem;
+
+    // 怎么延时确保自定义函数已绑定
+    setTimeout(function () {
+        _this.onBeforeUploadItem(_this.fileItem);
+        _this.xmlHttp.open("post", _this.fileItem.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+
+        if (_this.opt.headers) {
+            for (var i in _this.opt.headers) {
+                _this.xmlHttp.setRequestHeader(i, _this.opt.headers[i]);
+            }
+        }
+
+        _this.xmlHttp.send(_this.fileItem.formData); //开始上传，发送form数据
+    }, 20);
+};
+
 // 取消上传
 XhrFile.prototype.cancleUploadFile = function () {
-    console.log("cancleUploadFile");
+    _this.fileItem.isCancel = true;
+    _this.fileItem.isUploadding = false;
+    _this.fileItem.isUpload = false;
     this.xmlHttp.abort();
+    this.clearUploadFile();
 };
 // 清除文件
 XhrFile.prototype.clearUploadFile = function () {
-    this.dom.value = "";
+    if (this.fileItem.isUploadClear) {
+        // this.dom.outerHTML = this.dom.outerHTML;
+        this.dom.value = "";
+        this.dom.files[0] = null;
+    }
 };
-
-window.MOBLIE_CATCH = []; //预留mobile拦截数组
 
 /*
     ajax构造函数
@@ -216,9 +260,6 @@ function Ajax() {
 
 	// 注册拦截函数
 	this.catch = function () {};
-
-	// 移动端请求句柄
-	this.mobileHandle = null;
 }
 
 /*
@@ -236,7 +277,6 @@ Ajax.prototype.creatOpts = function (opts) {
 	_opts.method = opts.method && opts.method.toUpperCase();
 
 	_opts.catch = this.catch;
-	_opts.mobileHandle = this.mobileHandle;
 	return _opts;
 };
 
@@ -253,6 +293,7 @@ Ajax.prototype.ajax = function (_opts) {
 		return xml;
 	}
 	opts.url = this.opts.baseUrl + opts.url;
+	console.log(xmlHttp);
 	return new xhrObj(opts, xmlHttp);
 };
 
@@ -270,7 +311,7 @@ Ajax.prototype.config = function (opts) {
 };
 
 // 请求方法集合
-var methods_1 = ['get', 'delete', 'head', 'options']; //不带data
+var methods_1 = ['get', 'del', 'head', 'options']; //不带data
 var methods_2 = ['post', 'put', 'patch']; //带data
 for (var i in methods_1) {
 	!function (methods_1, i) {
@@ -302,13 +343,13 @@ for (var j in methods_2) {
 /*
   文件上传
 */
-Ajax.prototype.uploader = function (dom, opt) {
-	var fileObj = dom.files[0]; // js 获取文件对象
+Ajax.prototype.uploader = function (id, opt) {
+	var dom = document.getElementById(id);
+	if (dom.type !== "file") return;
 
-	var form = new FormData();
-	form.append("file", fileObj); // 文件对象
+	opt.url = this.opts.baseUrl + opt.url;
 
-	return new XhrFile(form, opt, dom);
+	return new XhrFile(opt, dom);
 };
 
 // 检验是否浏览器环境

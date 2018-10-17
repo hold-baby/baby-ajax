@@ -6,14 +6,8 @@ function xhrObj(type, opts, postData){
 	this.type = type;
 	this.opts = opts;
 	this.postData = postData;
-	this.catch = opts.catch;
-	this.mobileHandle = opts.mobileHandle
+	this.catch = opts.catch || function(){};
 	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-
-	if(!!this.mobileHandle && typeof this.mobileHandle == 'function'){
-		MOBLIE_CATCH.push(this.xmlHttp)
-		this.mobileHandle()
-	}
 
 	this.xmlHttp.open(opts.method, opts.url, opts.async);
 	this.xmlHttp.withCredentials = opts.withCredentials;
