@@ -112,6 +112,8 @@ Ajax.prototype.uploader = function(id, opt){
 	var dom = document.getElementById(id);
 	if(dom.type !== "file") return
 
+	opt.url = this.opts.baseUrl + opt.url;
+
 	return new XhrFile(opt, dom)
 }
 
