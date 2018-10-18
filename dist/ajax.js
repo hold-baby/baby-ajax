@@ -236,7 +236,7 @@ XhrFile.prototype.clearUploadFile = function () {
     if (this.fileItem.isUploadClear) {
         // this.dom.outerHTML = this.dom.outerHTML;
         this.dom.value = "";
-        this.dom.files[0] = null;
+        this.dom.files = null;
     }
 };
 

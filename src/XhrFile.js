@@ -31,7 +31,6 @@ function XhrFile(opt, dom){
         }
     }
     
-    
     //上传成功响应
     function uploadComplete(evt) {
         //服务断接收完文件返回的结果
@@ -144,7 +143,7 @@ XhrFile.prototype.clearUploadFile = function(){
     if(this.fileItem.isUploadClear){
         // this.dom.outerHTML = this.dom.outerHTML;
         this.dom.value = "";
-        this.dom.files[0] = null;
+        this.dom.files = null;
     }
 }
 

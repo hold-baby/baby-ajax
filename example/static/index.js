@@ -89,12 +89,13 @@ on("patch",function(){
 	})
 })
 var uploader = Ajax.uploader("fileUpload", {
-	url : addr + "/ajax/upload",
+	url : "/ajax/upload",
 	isUploadClear : true,
 	data : ["asdf","fsda"],
 	autoUpload : false
 })
 uploader.onBeforeUploadItem = function(item){
+	console.log(item)
 	item.data = {
 		"123" : 321
 	}

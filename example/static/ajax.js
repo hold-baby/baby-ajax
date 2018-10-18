@@ -212,6 +212,13 @@ XhrFile.prototype.upload = function () {
     setTimeout(function () {
         _this.onBeforeUploadItem(_this.fileItem);
         _this.xmlHttp.open("post", _this.fileItem.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
+
+        if (_this.opt.headers) {
+            for (var i in _this.opt.headers) {
+                _this.xmlHttp.setRequestHeader(i, _this.opt.headers[i]);
+            }
+        }
+
         _this.xmlHttp.send(_this.fileItem.formData); //开始上传，发送form数据
     }, 20);
 };
@@ -339,6 +346,8 @@ for (var j in methods_2) {
 Ajax.prototype.uploader = function (id, opt) {
 	var dom = document.getElementById(id);
 	if (dom.type !== "file") return;
+
+	opt.url = this.opts.baseUrl + opt.url;
 
 	return new XhrFile(opt, dom);
 };

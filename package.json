@@ -1,6 +1,6 @@
 {
   "name": "baby-ajax",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "One is only 5KB ajax library",
   "main": "dist/ajax.min.js",
   "scripts": {
