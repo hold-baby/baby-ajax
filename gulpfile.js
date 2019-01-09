@@ -1,7 +1,5 @@
 'use strict'
 
-const fs = require('fs')
-const cp = require('child_process')
 const gulp = require('gulp')
 const uglify = require('gulp-uglify')
 const sourcemaps = require('gulp-sourcemaps')
@@ -14,8 +12,10 @@ const babel = require('rollup-plugin-babel')
 const resolve = require('rollup-plugin-node-resolve')
 const pkg = require('./package.json')
 
-const ENV = gulp.env.env;
-const FILE_ADDR = ENV == 'dev' ? './example/static/' : './dist/';
+const FILE_ADDR = './dist/';
+
+// const ENV = gulp.env.env;
+// const FILE_ADDR = ENV == 'dev' ? './example/static/' : './dist/';
 
 const banner = () => {
   return [
@@ -54,7 +54,6 @@ gulp.task('structure', function(){
             name: 'Ajax',
             file: FILE_ADDR + 'ajax.js',
         }).then(function(){
-            if(ENV == 'dev') return
             gulp.src(FILE_ADDR + './ajax.js')
                 .pipe(gulp.dest(FILE_ADDR))
                 .pipe(stripDebug())
@@ -71,8 +70,15 @@ gulp.task('structure', function(){
     })
 })
 
-gulp.task("dev", ['structure'], function(){
-	gulp.watch('./src/*.js',['structure'])
+gulp.task("move", function(){
+    setTimeout(function(){
+        gulp.src('./dist/ajax.js')
+            .pipe(gulp.dest("./example/static"))
+    }, 1000)
 })
-gulp.task("build", ['clean','structure'], function(){
+
+gulp.task("dev", ['structure','move'], function(){
+	gulp.watch('./src/*.js',['structure','move'])
+})
+gulp.task("build", ['structure'], function(){
 })

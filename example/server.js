@@ -33,7 +33,7 @@ app.use('/',bodyParser.urlencoded({
   extended: true
 }));
 
-var arr = [200, 203, 302, 304, 400, 401];
+var arr = [200, 203, 302, 400, 401];
 function creatStatus(){
 	return arr[Math.floor((Math.random()*arr.length))]; 
 }
@@ -80,70 +80,69 @@ app.patch("/ajax/patch", function(req, res){
 	})
 })
 
-var uploadDir = path.join(__dirname + '/fileTmp')  //文件保存的临时目录为当前项目下的tmp文件夹  
-var maxFieldsSize = 1 * 1024 * 1024;  // 文件大小限制为最大1M 
-var targetDir = path.join(__dirname + '/public'); //文件移动的目录文件夹，不存在时创建目标文件夹 
-// var allowFile = '.jpg.jpeg.png.gif';  // 允许上传的类型
-var allowFile = ['.jpg','.jpeg','.png','.gif'];  // 允许上传的类型
-var limitFile = [];  // 禁止上传的类型
-var limitType = 0; // 1 : allowFile; 0 : limitFile
+// 上传临时目录
+const tmpdir = path.resolve(__dirname + '/fileTmp');
+// 目标部署目录
+const targetDir = path.resolve(__dirname + '/public');
+
+// 文件大小限制 => 1M
+// const maxFieldsSize = 1 * 1024 * 1024;
+const maxFieldsSize = '';
 
 app.post("/ajax/upload",function(req,res){
-	var form  = new formidable.IncomingForm();
-	form.uploadDir = uploadDir;   
-    form.maxFieldsSize =    maxFieldsSize
-    form.keepExtensions = true;        //使用文件的原扩展名 
-	form.parse(req,function(err,fields,file){  // fields额外参数
-		var filePath = "";
-		if(file.tmpFile){  
+    let form  = new formidable.IncomingForm();
+
+    // 判断是否有临时目录 如果没有则创建
+    if (!fs.existsSync(tmpdir)) {  
+        fs.mkdir(tmpdir, () => {});  
+    }
+
+    // 把文件上传至临时目录
+    form.uploadDir = tmpdir;
+    // 设置接受的文件大小限制
+    // form.maxFieldsSize = maxFieldsSize;
+    // 使用文件的原扩展名
+    form.keepExtensions = true; 
+
+    form.parse(req, (err,fields,file) => {
+
+        let filePath = ""; // 文件的目录层级
+        let fileName = ""; // 文件原始名字
+
+        // 查找文件相关信息
+        if(file.tmpFile){  
             filePath = file.tmpFile.path;  
         } else {  
-            for(var key in file){  
-                if( file[key].path && filePath==='' ){  
+            for(let key in file){  
+                if( file[key].path && filePath ==='' ){  
                     filePath = file[key].path;  
+                    fileName = file[key].name;
                     break;  
                 }  
             }  
         }
-         
+        
+        // 判断是否有部署目录 如果没有则创建
         if (!fs.existsSync(targetDir)) {  
-            fs.mkdir(targetDir);  
+            fs.mkdir(targetDir, () => {});  
         }
-        var fileExt = filePath.substring(filePath.lastIndexOf('.'));
-        var isAllowUpload = false // 是否允许上传
-        if(limitType == 1){
-            isAllowUpload = allowFile.some(function(type){
-                return fileExt.toLowerCase() == type
-            })
-        }else{
-            isAllowUpload = !limitFile.some(function(type){
-                return fileExt.toLowerCase() == type
-            })
-        }
-        if(isAllowUpload){  
-            //以当前时间戳对上传文件进行重命名  
-            var fileName = new Date().getTime() + fileExt;  
-            var targetFile = path.join(targetDir, fileName);  
-            //移动文件  
-            fs.rename(filePath, targetFile, function (err) {  
-                if(err){  
-                    console.info(err);  
-                    res.status(400).send({
-                        message : "操作失败"
-                    }).end();
-                }else{  
-                    res.status(200).send({
-                        message : "操作成功"
-                    }).end();
-                }  
-            });  
-        }else{
-            var err = new Error('此文件类型不允许上传');  
-            res.status(400).send({
-                message : "此文件类型不允许上传"
-            }).end();
-        } 
-	})
+
+        // 获取文件后缀名
+        const fileExt = filePath.substring(filePath.lastIndexOf('.'));
+
+        // 修改文件名为原文件名
+        const targetName = path.join(tmpdir, fileName);
+
+        fs.rename(filePath ,targetName, (err) => {
+            if (err) {  
+                console.info(err);
+                res.status(400).send('400').end('上传失败');
+            } else { 
+                res.status(200).send('200').end();
+
+            } 
+        })
+    })
 })
 
 

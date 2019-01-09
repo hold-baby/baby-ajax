@@ -1,45 +1,43 @@
-import {mergeHeaders, parseResponse} from './Common.js'
-/*
-  xml请求构造函数
-*/
-function xhrObj(type, opts, postData){
-	this.type = type;
-	this.opts = opts;
-	this.postData = postData;
-	this.catch = opts.catch || function(){};
-	this.xmlHttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+/**
+ * 执行请求函数
+ * @opt 			请求配置
+ * @resolve 		请求成功函数
+ * @reject 			请求失败函数
+ */
+function Xhr(opt, resolve, reject){
+	let xhr;
 
-	this.xmlHttp.open(opts.method, opts.url, opts.async);
-	this.xmlHttp.withCredentials = opts.withCredentials;
-	for(var i in this.opts.headers){
-		this.xmlHttp.setRequestHeader(i, this.opts.headers[i]);
-	}
-	if(type == "methods_1"){
-	    this.xmlHttp.send(null);
+	if(window.XMLHttpRequest){
+		xhr = new XMLHttpRequest()
 	}else{
-        
-        this.xmlHttp.send(this.postData);
+		xhr = new ActiveXObject('Microsoft.XMLHTTP')
 	}
-	return this
-};
-/*
-  请求回调
-*/
-xhrObj.prototype.then = function(success, error){
-	var _this = this;
-		
-	if (this.xmlHttp.readyState == 4) {
-		this.catch(parseResponse(this.xmlHttp))
-        if(this.xmlHttp.status >= 200 && this.xmlHttp.status < 300){
-        	success(parseResponse(this.xmlHttp))
-        }else{
-            error(parseResponse(this.xmlHttp))
-        }
-    }else{
-    	setTimeout(function(){
-    		_this.then(success, error)
-    	},20)
-    }
+
+	xhr.onreadystatechange = function(){
+		if(xhr.readyState === 4){
+			let res = xhr.responseText ? JSON.parse(xhr.responseText) : ''
+			let status = xhr.status
+			let headers = xhr.getAllResponseHeaders().split('\n')
+			if(xhr.status >= 200 && xhr.status < 300){
+				// ssucess
+				resolve(res, status, headers)
+			}else{
+				// error
+				reject(res, status, headers)
+			}
+
+			opt.catch(res, status, headers)
+
+		}
+	}
+
+	xhr.open(opt.method,opt.url,opt.async)
+
+	for(let i in opt.headers){
+		xhr.setRequestHeader(i,opt.headers[i])
+	}
+
+	xhr.send(opt.data)	
 };
 
-export default xhrObj
+export default Xhr

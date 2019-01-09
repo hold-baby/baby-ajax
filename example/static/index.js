@@ -1,6 +1,5 @@
 var addr = "http://127.0.0.1:10010"
 
-
 function on(id,fn){
 	var ele = document.getElementById(id);
 	try{
@@ -9,8 +8,8 @@ function on(id,fn){
 		ele.attachEvent("click",fn)
 	}
 };
-Ajax.catch = function(res){
-	console.log("catch")
+
+Ajax.catch = function(res,status,headers){
 };
 Ajax.config({
 	headers : {
@@ -38,7 +37,7 @@ on("get",function(){
 	})
 })
 on("delete",function(){
-	Ajax.del("/ajax/delete?u=delete").then(function(res){
+	Ajax.delete("/ajax/delete?u=delete").then(function(res){
 		console.log(res)
 	}, function(res){
 		console.log(res)
@@ -72,7 +71,7 @@ on("put",function(){
 	var data = {
 		des : "put"
 	}
-	Ajax.put(addr + "/ajax/put", data, {}).then(function(res){
+	Ajax.put("/ajax/put").then(function(res){
 		console.log(res)
 	}, function(res){
 		console.log(res)
@@ -82,20 +81,21 @@ on("patch",function(){
 	var data = {
 		des : "patch"
 	}
-	Ajax.patch(addr + "/ajax/patch", data, {}).then(function(res){
+	Ajax.patch("/ajax/patch", data, {}).then(function(res){
 		console.log(res)
 	}, function(res){
 		console.log(res)
 	})
 })
-var uploader = Ajax.uploader("fileUpload", {
+var file = document.getElementById('fileUpload').files[0];
+
+var uploader = Ajax.uploader('fileUpload', {
 	url : "/ajax/upload",
 	isUploadClear : true,
 	data : ["asdf","fsda"],
 	autoUpload : false
 })
 uploader.onBeforeUploadItem = function(item){
-	console.log(item)
 	item.data = {
 		"123" : 321
 	}
@@ -107,9 +107,11 @@ uploader.onErrorItem  = function(item, res, status){
 	console.log(item)
 }
 uploader.onProgressItem  = function(item, progress){
-	console.log(item.isUpload)
+	console.log(progress)
 }
 on("fileId",function(){
+	console.log(file)
+
 	uploader.upload()
 })
 function showDes(str){

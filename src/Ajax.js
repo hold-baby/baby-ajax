@@ -1,120 +1,129 @@
-import {mergeHeaders, request_1, request_2} from './Common.js'
-import xhrObj from './Xhr.js'
-import XhrFile from './XhrFile.js'
+import { mergeOpt, copy, encode } from './utils.js'
+import Defer from './Defer.js'
+import FileUpload from './FileUpload.js'
 
-/*
-    ajax构造函数
-*/
-function Ajax(){
-	// 注册初始配置
-	this.opts = {};
-	this.opts.headers = {
+// 默认设置
+let defaultOpt = {
+	baseUrl : '',
+	headers : {
 		'Content-Type' : 'application/json;charset=utf-8'
-	};
-	this.opts.method = 'POST';
-	this.opts.async = true;
-	this.opts.data = null;
-	this.opts.url = "";
-	this.opts.baseUrl = "";
-
+	},
+	// 默认异步操作
+	async : true,
 	// 默认跨域不带cookie
-	this.withCredentials = false;
-
-	// 注册拦截函数
-	this.catch = function(){};
-
+	withCredentials : false
 };
 
-/*
-  整合opt
-*/
-Ajax.prototype.creatOpts = function (opts){
-	var _opts = this.opts;
-	for(var i in  opts){
-		if(i == "headers"){
-			_opts[i] = mergeHeaders(_opts[i], opts[i])
+/**
+ * Ajax构造函数
+ */
+function Ajax(){
+};
+
+// 请求方法集合
+var methods_1 = ['get', 'delete', 'head', 'options']; //不带data
+var methods_2 = ['post', 'put', 'patch']; //带data
+for(let i in methods_1){
+	Ajax.prototype[methods_1[i]] = function(url, _opts) {
+
+		_opts = _opts || {}
+
+		var opts = mergeOpt(defaultOpt, _opts)
+
+		opts.method = methods_1[i].toUpperCase();
+
+		opts.url = opts.baseUrl + url;
+
+		opts.data = null;
+
+		opts.catch = this.catch
+
+		return Defer(opts)
+	}	
+};
+for(let j in methods_2){
+	Ajax.prototype[methods_2[j]] = function(url, data, _opts){
+
+		_opts = _opts || {}
+
+		if(!_opts.headers){
+			_opts.headers = {}
+			_opts.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8'
+		}else{
+			if(!_opts.headers['Content-Type']){
+				_opts.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8'
+			}
 		}
-		_opts[i] = opts[i];
+
+		var opts = mergeOpt(defaultOpt, _opts)
+
+		opts.method = methods_2[j].toUpperCase();
+
+		opts.url = opts.baseUrl + url;
+
+		opts.data = data;
+
+		opts.catch = this.catch
+
+		if(opts.data){
+			let cache = [];
+
+			for(let i in opts.data){
+				cache.push(i + '=' + opts.data[i])
+			}
+
+			opts.data = cache.join('&')
+		}
+
+		return Defer(opts)
 	}
-
-	_opts.method = opts.method && opts.method.toUpperCase();
-
-    _opts.catch = this.catch;
-    return _opts;
 };
 
-/*
-  ajax方法
-*/
-Ajax.prototype.ajax = function(_opts){
-	var opts = this.creatOpts(_opts)
-	var _this= this;
-    if (methods_2.indexOf(opts.method.toLowerCase()) !== -1) {
-    	var xml = request_2(opts)
-	    return xml
-    }else if (methods_1.indexOf(opts.method.toLowerCase()) !== -1) {
-        var xml = request_1(opts)
-		return xml
-    }
-    opts.url = this.opts.baseUrl + opts.url;
-    console.log(xmlHttp)
-    return new xhrObj(opts, xmlHttp)
-};
+/**
+ * 纯配置请求函数
+ */
+Ajax.prototype.ajax = function(options){
+	try{
+		let method = options.method.toLowerCase();
 
-/*
-  暴露一个配置方法
-*/
-Ajax.prototype.config = function(opts){
-	for(var i in opts){
-		if(i == "headers"){
-			opts[i] = mergeHeaders(this.opts[i], opts[i])
-			continue
+		if(methods_1.indexOf(method) !== -1){
+			return this[method](options.url,options)
+		}else if(methods_2.indexOf(method) !== -1){
+			return this[method](options.url,options.data,options)
+		}else{
+			throw new Error('error')
 		}
-		this.opts[i] = opts[i]
+
+	} catch(e){
+		throw new Error(e)
 	}
 }
 
+/** 
+ * 暴露默认配置
+ */
+Ajax.prototype.config = function(opt){
+	defaultOpt = mergeOpt(defaultOpt, opt)
+}
 
-// 请求方法集合
-var methods_1 = ['get', 'del', 'head', 'options']; //不带data
-var methods_2 = ['post', 'put', 'patch']; //带data
-for(var i in methods_1){
-	!function(methods_1, i){
-		Ajax.prototype[methods_1[i]] = function(url, _opts){
+/** 
+ * 注册拦截函数
+ */
+Ajax.prototype.catch = function(){
+}
 
-			var opts = this.creatOpts(_opts || {})
-			opts.method = methods_1[i].toUpperCase();
-			opts.url = this.opts.baseUrl + url;
+/** 
+ * 文件上传
+ */
+Ajax.prototype.uploader = function(id, _opt){
+	_opt = _opt || {}
+	var opt = mergeOpt(defaultOpt, _opt)
 
-			var xml = request_1(opts)
-			return xml
-		}	
-	}(methods_1, i)
-};
-for(var j in methods_2){
-	!function(methods_2, j){
-		Ajax.prototype[methods_2[j]] = function(url, data, opts){
-			opts = this.creatOpts(opts || {})
-			opts.method = methods_2[j].toUpperCase();
-			opts.url = this.opts.baseUrl + url;
-			opts.data = data || {};
+	opt.url = opt.baseUrl + opt.url;
 
-			var xml = request_2(opts)
-	        return xml
-		}
-	}(methods_2, j)
-};
+	var dom = document.getElementById(id)
 
-/*
-  文件上传
-*/
-Ajax.prototype.uploader = function(id, opt){
-	var dom = document.getElementById(id);
-	if(dom.type !== "file") return
-
-	opt.url = this.opts.baseUrl + opt.url;
-
-	return new XhrFile(opt, dom)
+	return new FileUpload(dom, opt)
 }
 
 export default Ajax
