@@ -6,6 +6,7 @@ const sourcemaps = require('gulp-sourcemaps')
 const header = require('gulp-header')
 const rename = require('gulp-rename')
 const clean = require('gulp-clean')
+const beautify = require('gulp-beautify');
 const stripDebug = require('gulp-strip-debug');
 const rollup = require('rollup')
 const babel = require('rollup-plugin-babel')
@@ -13,9 +14,20 @@ const resolve = require('rollup-plugin-node-resolve')
 const pkg = require('./package.json')
 
 const FILE_ADDR = './dist/';
+const DEV_ADDR = './example/static/'
 
-// const ENV = gulp.env.env;
-// const FILE_ADDR = ENV == 'dev' ? './example/static/' : './dist/';
+let rollupOpt = {
+    // 入口文件
+    input: './index.js',
+    plugins: [
+        resolve(),
+        babel({
+            babelrc: false,
+            presets: [['env', { modules: false }]],
+            exclude: 'node_modules/**' // only transpile our source code
+        })
+    ]
+}
 
 const banner = () => {
   return [
@@ -30,31 +42,17 @@ const banner = () => {
   ].join('\n')
 }
 
-gulp.task('clean', function() {
-    return gulp.src('dist', {read: false}) //这里设置的dist表示删除dist文件夹及其下所有文件
-        	.pipe(clean())
-})
-
 gulp.task('structure', function(){
     // 使用rollup构建
-    return rollup.rollup({
-        // 入口文件
-        input: './index.js',
-        plugins: [
-            // 对原始文件启动 eslint 检查，配置参见 ./.eslintrc.json
-            // eslint(),
-            resolve(),
-            babel({
-                exclude: 'node_modules/**' // only transpile our source code
-            })
-        ]
-    }).then(function(bundle){
+    return rollup.rollup(rollupOpt)
+    .then(function(bundle){
         bundle.write({
             format: 'umd',
             name: 'Ajax',
             file: FILE_ADDR + 'ajax.js',
         }).then(function(){
             gulp.src(FILE_ADDR + './ajax.js')
+                .pipe(beautify({indent_size: 4}))
                 .pipe(gulp.dest(FILE_ADDR))
                 .pipe(stripDebug())
                 .pipe(sourcemaps.init())
@@ -70,15 +68,24 @@ gulp.task('structure', function(){
     })
 })
 
-gulp.task("move", function(){
-    setTimeout(function(){
-        gulp.src('./dist/ajax.js')
-            .pipe(gulp.dest("./example/static"))
-    }, 1000)
+gulp.task('dev_structure', function(){
+    // 使用rollup构建
+    return rollup.rollup(rollupOpt)
+    .then(function(bundle){
+        bundle.write({
+            format: 'umd',
+            name: 'Ajax',
+            file: DEV_ADDR + 'ajax.js',
+        }).then(function(){
+            gulp.src(DEV_ADDR + 'ajax.js')
+                .pipe(beautify({indent_size: 4}))
+                .pipe(gulp.dest(DEV_ADDR))
+        })
+    })
 })
 
-gulp.task("dev", ['structure','move'], function(){
-	gulp.watch('./src/*.js',['structure','move'])
+gulp.task("dev", ['dev_structure'], function(){
+	gulp.watch('./src/*.js',['dev_structure'])
 })
 gulp.task("build", ['structure'], function(){
 })

@@ -12,23 +12,23 @@ let defaultOpt = {
 	async : true,
 	// 默认跨域不带cookie
 	withCredentials : false
-};
+}
 
 /**
  * Ajax构造函数
  */
 function Ajax(){
-};
+}
 
 // 请求方法集合
-var methods_1 = ['get', 'delete', 'head', 'options']; //不带data
-var methods_2 = ['post', 'put', 'patch']; //带data
+const methods_1 = ['get', 'delete', 'head', 'options'] //不带data
+const methods_2 = ['post', 'put', 'patch'] //带data
 for(let i in methods_1){
 	Ajax.prototype[methods_1[i]] = function(url, _opts) {
 
 		_opts = _opts || {}
 
-		var opts = mergeOpt(defaultOpt, _opts)
+		let opts = mergeOpt(defaultOpt, _opts)
 
 		opts.method = methods_1[i].toUpperCase();
 
@@ -40,7 +40,7 @@ for(let i in methods_1){
 
 		return Defer(opts)
 	}	
-};
+}
 for(let j in methods_2){
 	Ajax.prototype[methods_2[j]] = function(url, data, _opts){
 
@@ -55,7 +55,7 @@ for(let j in methods_2){
 			}
 		}
 
-		var opts = mergeOpt(defaultOpt, _opts)
+		let opts = mergeOpt(defaultOpt, _opts)
 
 		opts.method = methods_2[j].toUpperCase();
 
@@ -77,7 +77,7 @@ for(let j in methods_2){
 
 		return Defer(opts)
 	}
-};
+}
 
 /**
  * 纯配置请求函数
@@ -117,11 +117,11 @@ Ajax.prototype.catch = function(){
  */
 Ajax.prototype.uploader = function(id, _opt){
 	_opt = _opt || {}
-	var opt = mergeOpt(defaultOpt, _opt)
+	let opt = mergeOpt(defaultOpt, _opt)
 
 	opt.url = opt.baseUrl + opt.url;
 
-	var dom = document.getElementById(id)
+	let dom = document.getElementById(id)
 
 	return new FileUpload(dom, opt)
 }

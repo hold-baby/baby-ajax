@@ -1,7 +1,7 @@
 import Xhr from './Xhr.js'
 
 // 检测是否支持promise
-const isPromise = !!window.Promise;
+const isPromise = !!window.Promise
 
 /**
  * 包裹请求函数

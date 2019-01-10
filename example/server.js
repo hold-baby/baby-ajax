@@ -10,7 +10,7 @@ var exec = require("child_process").exec;
 
 var app = express();
 var static = express();
-static.use('/', express.static("static"));
+static.use('/', express.static("example/static"));
 
 app.all("*", function(req, res, next){
     // res.header("Access-Control-Allow-Origin", "*");  
@@ -156,7 +156,7 @@ static.listen(STATIC_PROT, function(){
 	opn("http://127.0.0.1:" + STATIC_PROT)
 })
 
-var cmd = "cd .. && npm run example";
+var cmd = "gulp dev";
 var dev = exec(cmd, function(error, stdout, stderr){
 	console.log(error)
 	console.log(stdout)
