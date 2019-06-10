@@ -15,7 +15,15 @@ function Xhr(opt, resolve, reject){
 
 	xhr.onreadystatechange = function(){
 		if(xhr.readyState === 4){
-			let res = xhr.responseText ? JSON.parse(xhr.responseText) : ''
+			let res = ''
+
+			// 兼容文本返回与json返回∂
+			try{
+				res = JSON.parse(xhr.responseText)
+			}catch(e){
+				res = xhr.responseText ? xhr.responseText : ""
+			}
+
 			let status = xhr.status
 			let headers = xhr.getAllResponseHeaders().split('\n')
 			if(xhr.status >= 200 && xhr.status < 300){

@@ -1,6 +1,6 @@
 {
   "name": "baby-ajax",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "description": "One is only 5KB ajax library",
   "main": "dist/ajax.min.js",
   "scripts": {
@@ -25,23 +25,23 @@
   },
   "homepage": "https://github.com/hold-baby/baby-ajax#readme",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "express": "^4.16.4",
-    "formidable": "^1.2.1",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^8.0.0",
-    "gulp-beautify": "^2.0.1",
-    "gulp-clean": "^0.4.0",
-    "gulp-header": "^2.0.7",
-    "gulp-rename": "^1.4.0",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-strip-debug": "^3.0.0",
-    "gulp-uglify": "^3.0.1",
-    "opn": "^5.4.0",
-    "rollup": "^1.0.2",
-    "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-node-resolve": "^4.0.0"
+    "babel-core": "6.26.0",
+    "babel-preset-env": "1.7.0",
+    "express": "4.16.4",
+    "formidable": "1.2.1",
+    "gulp": "3.9.1",
+    "gulp-babel": "8.0.0",
+    "gulp-beautify": "2.0.1",
+    "gulp-clean": "0.4.0",
+    "gulp-header": "2.0.7",
+    "gulp-rename": "1.4.0",
+    "gulp-sourcemaps": "2.6.4",
+    "gulp-strip-debug": "3.0.0",
+    "gulp-uglify": "3.0.1",
+    "opn": "5.4.0",
+    "rollup": "1.0.2",
+    "rollup-plugin-babel": "3.0.7",
+    "rollup-plugin-node-resolve": "4.0.0"
   },
   "dependencies": {}
 }
