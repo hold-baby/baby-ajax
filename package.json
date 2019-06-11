@@ -1,6 +1,6 @@
 {
   "name": "baby-ajax",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "description": "One is only 5KB ajax library",
   "main": "dist/ajax.min.js",
   "scripts": {
@@ -24,6 +24,11 @@
     "url": "https://github.com/hold-baby/baby-ajax/issues"
   },
   "homepage": "https://github.com/hold-baby/baby-ajax#readme",
+  "babel": {
+    "presets": [
+      ["env", { "modules": false }]
+    ]
+  },
   "devDependencies": {
     "babel-core": "6.26.0",
     "babel-preset-env": "1.7.0",
