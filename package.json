@@ -1,8 +1,8 @@
 {
   "name": "baby-ajax",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "description": "One is only 5KB ajax library",
-  "main": "dist/ajax.min.js",
+  "main": "index.js",
   "scripts": {
     "dev": "node example/server",
     "build": "gulp build"
