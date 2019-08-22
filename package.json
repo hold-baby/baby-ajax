@@ -1,6 +1,6 @@
 {
   "name": "baby-ajax",
-  "version": "1.6.10",
+  "version": "1.6.11",
   "description": "One is only 5KB ajax library",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,12 @@
   "homepage": "https://github.com/hold-baby/baby-ajax#readme",
   "babel": {
     "presets": [
-      ["env", { "modules": false }]
+      [
+        "env",
+        {
+          "modules": false
+        }
+      ]
     ]
   },
   "devDependencies": {

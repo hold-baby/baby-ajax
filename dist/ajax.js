@@ -285,10 +285,10 @@
 
             if (!_opts.headers) {
                 _opts.headers = {};
-                _opts.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+                _opts.headers['Content-Type'] = 'application/json;charset=utf-8';
             } else {
                 if (!_opts.headers['Content-Type']) {
-                    _opts.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
+                    _opts.headers['Content-Type'] = 'application/json;charset=utf-8';
                 }
             }
 
@@ -302,15 +302,16 @@
 
             opts.catch = this.catch;
 
-            if (opts.data) {
-                var cache = [];
+            // if(opts.data){
+            // 	let cache = [];
 
-                for (var i in opts.data) {
-                    cache.push(i + '=' + opts.data[i]);
-                }
+            // 	for(let i in opts.data){
+            // 		cache.push(i + '=' + opts.data[i])
+            // 	}
 
-                opts.data = cache.join('&');
-            }
+            // 	opts.data = cache.join('&')
+            // }
+            opts.data = JSON.stringify(opts.data);
 
             return Defer(opts);
         };
