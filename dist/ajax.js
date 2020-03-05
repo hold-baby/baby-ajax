@@ -205,6 +205,10 @@
 
             this.xhr.open("post", this.opt.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
             this.onBeforeUploadItem(this.fileItem);
+            for (var i in opt.headers) {
+                if (i === "Content-Type") continue;
+                this.xhr.setRequestHeader(i, opt.headers[i]);
+            }
             this.xhr.send(this.fileItem.formData); //开始上传，发送form数据
         },
         onSuccessItem: function onSuccessItem() {},
@@ -355,15 +359,18 @@
     /** 
      * 文件上传
      */
-    Ajax.prototype.uploader = function(id, _opt) {
+    Ajax.prototype.uploader = function(dom, _opt) {
         _opt = _opt || {};
         var opt = mergeOpt(defaultOpt, _opt);
 
         opt.url = opt.baseUrl + opt.url;
 
-        var dom = document.getElementById(id);
+        var ele = dom;
+        if (typeof dom === "string") {
+            ele = document.getElementById(dom);
+        }
 
-        return new FileUpload(dom, opt);
+        return new FileUpload(ele, opt);
     };
 
     // 检验是否浏览器环境
