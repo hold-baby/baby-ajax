@@ -64,7 +64,7 @@ Ajax.catch = function(){ /*  your code  */ }  //请求返回后的统一拦截�
 # uploader
 
 ```js
-var uploader = Ajax.uploader(id, opt)  // id为input[type=file]的id  opt为配置对象
+var uploader = Ajax.uploader(id/dom, opt)  // id为input[type=file]的id或者为节点对象  opt为配置对象
 uploader.onBeforeUploadItem = function(fileItem){
   // 上传前回调
 }

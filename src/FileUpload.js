@@ -100,6 +100,10 @@ FileUpload.prototype = {
 
     	this.xhr.open("post", this.opt.url, true); //post方式，url为服务器请求地址，true 该参数规定请求是否异步处理。
 		this.onBeforeUploadItem(this.fileItem)
+		for(let i in opt.headers){
+			if(i === "Content-Type") continue
+			this.xhr.setRequestHeader(i, opt.headers[i])
+		}
         this.xhr.send(this.fileItem.formData); //开始上传，发送form数据
 	},
 	onSuccessItem : function(){},

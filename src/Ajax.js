@@ -117,15 +117,18 @@ Ajax.prototype.catch = function(){
 /** 
  * 文件上传
  */
-Ajax.prototype.uploader = function(id, _opt){
+Ajax.prototype.uploader = function(dom, _opt){
 	_opt = _opt || {}
 	let opt = mergeOpt(defaultOpt, _opt)
 
 	opt.url = opt.baseUrl + opt.url;
 
-	let dom = document.getElementById(id)
+	let ele = dom;
+	if(typeof dom === "string"){
+		ele = document.getElementById(dom)
+	}
 
-	return new FileUpload(dom, opt)
+	return new FileUpload(ele, opt)
 }
 
 export default Ajax
